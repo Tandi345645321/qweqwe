@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS2-STYLE Шутер</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #0c0c0c;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Главное меню */
+        #main-menu {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), 
+                        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="%231a1a1a"/><path d="M0 0L200 200M200 0L0 200" stroke="%23333" stroke-width="2"/></svg>');
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.5s;
+        }
+
+        .menu-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .logo {
+            font-size: 5rem;
+            font-weight: bold;
+            margin-bottom: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            background: linear-gradient(45deg, #ff8a00, #e52e71, #00b4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(229, 46, 113, 0.7);
+            animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px rgba(229, 46, 113, 0.7);
+            }
+            to {
+                text-shadow: 0 0 20px rgba(229, 46, 113, 0.9), 0 0 30px rgba(255, 138, 0, 0.6);
+            }
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 350px;
+        }
+
+        .menu-btn {
+            padding: 18px 30px;
+            background: rgba(25, 25, 25, 0.9);
+            border: 2px solid #555;
+            color: #fff;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-btn:hover {
+            background: rgba(40, 40, 40, 0.9);
+            border-color: #ff8a00;
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(255, 138, 0, 0.4);
+        }
+
+        .menu-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .menu-btn:hover::after {
+            left: 100%;
+        }
+
+        /* Игровой экран */
+        #game-screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100%;
+            background: #1a1a2e;
+        }
+
+        /* HUD элементы */
+        #hud {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .weapon-hud {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 300px;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #555;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .weapon-img {
+            width: 100px;
+            height: 80px;
+            background: linear-gradient(45deg, #333, #555);
+            margin-right: 15px;
+            border-radius: 5px;
+            border: 1px solid #777;
+        }
+
+        .weapon-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .weapon-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ff8a00;
+        }
+
+        .ammo {
+            font-size: 1.5rem;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .health-bar {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            width: 250px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #444;
+            border-radius: 10px;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(to right, #ff0000, #ff8a00, #00ff00);
+            width: 100%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .armor-bar {
+            position: absolute;
+            top: 85px;
+            left: 30px;
+            width: 250px;
+            height: 25px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #444;
+            border-radius: 10px;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+
+        .armor-fill {
+            height: 100%;
+            background: linear-gradient(to right, #0066cc, #00aaff);
+            width: 100%;
+            transition: width 0.3s;
+        }
+
+        .money-display {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #ffcc00;
+            border: 2px solid #555;
+            backdrop-filter: blur(5px);
+        }
+
+        .mini-map {
+            position: absolute;
+            top: 85px;
+            right: 30px;
+            width: 180px;
+            height: 180px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #444;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Меню закупа */
+        #buy-menu {
+            position: absolute;
+            width: 85%;
+            height: 75%;
+            background: rgba(20, 20, 30, 0.95);
+            border: 3px solid #555;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            flex-wrap: wrap;
+            padding: 25px;
+            z-index: 30;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .buy-section {
+            flex: 1;
+            min-width: 220px;
+            padding: 15px;
+            border-right: 1px solid #444;
+        }
+
+        .buy-section:last-child {
+            border-right: none;
+        }
+
+        .buy-section h3 {
+            color: #ff8a00;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            border-bottom: 2px solid #444;
+            padding-bottom: 5px;
+        }
+
+        .buy-item {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: rgba(40, 40, 50, 0.8);
+            border: 1px solid #555;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .buy-item:hover {
+            background: rgba(60, 60, 70, 0.8);
+            border-color: #ff8a00;
+            transform: translateX(5px);
+        }
+
+        .item-price {
+            color: #ffcc00;
+            font-weight: bold;
+        }
+
+        /* Магазин скинов */
+        #skin-store {
+            position: absolute;
+            width: 90%;
+            height: 85%;
+            background: rgba(20, 20, 30, 0.95);
+            border: 3px solid #555;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            flex-wrap: wrap;
+            padding: 25px;
+            z-index: 30;
+            border-radius: 15px;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .skin-category {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .skin-category h3 {
+            color: #ff8a00;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #444;
+            padding-bottom: 5px;
+        }
+
+        .skin-item {
+            display: inline-block;
+            width: 180px;
+            height: 120px;
+            background: #333;
+            margin: 10px;
+            border: 3px solid #555;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skin-item:hover {
+            border-color: #ff8a00;
+            transform: scale(1.08);
+            box-shadow: 0 0 15px rgba(255, 138, 0, 0.5);
+        }
+
+        .skin-name {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .skin-price {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 204, 0, 0.9);
+            color: #000;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        /* Настройки графики */
+        #graphics-settings {
+            position: absolute;
+            width: 70%;
+            height: 80%;
+            background: rgba(20, 20, 30, 0.95);
+            border: 3px solid #555;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            flex-direction: column;
+            padding: 25px;
+            z-index: 30;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .settings-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            color: #ff8a00;
+        }
+
+        .setting-option {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(40, 40, 50, 0.6);
+            border-radius: 10px;
+        }
+
+        .setting-option label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            color: #ddd;
+        }
+
+        .setting-option select {
+            width: 100%;
+            padding: 10px;
+            background: rgba(30, 30, 40, 0.8);
+            border: 2px solid #555;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        /* Кейсы */
+        #cases-screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 40;
+        }
+
+        .cases-title {
+            font-size: 3rem;
+            margin-bottom: 40px;
+            color: #ff8a00;
+            text-shadow: 0 0 10px rgba(255, 138, 0, 0.7);
+        }
+
+        .cases-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 900px;
+        }
+
+        .case {
+            width: 220px;
+            height: 280px;
+            background: linear-gradient(45deg, #8B4513, #D2691E, #CD853F);
+            margin: 20px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .case:hover {
+            transform: translateY(-15px) rotate(5deg);
+            box-shadow: 0 20px 30px rgba(255, 138, 0, 0.4);
+        }
+
+        .case::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: 0.5s;
+        }
+
+        .case:hover::before {
+            animation: shine 1.5s;
+        }
+
+        @keyframes shine {
+            0% { transform: rotate(45deg) translateX(-100%); }
+            100% { transform: rotate(45deg) translateX(100%); }
+        }
+
+        .case-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            z-index: 1;
+        }
+
+        /* Управление для мобильных */
+        #mobile-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            display: none;
+            z-index: 25;
+        }
+
+        .controls-row {
+            display: flex;
+            justify-content: center;
+        }
+
+        .control-btn {
+            width: 70px;
+            height: 70px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #555;
+            border-radius: 50%;
+            margin: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.8rem;
+            pointer-events: auto;
+            backdrop-filter: blur(5px);
+            transition: all 0.2s;
+        }
+
+        .control-btn:active {
+            background: rgba(255, 138, 0, 0.3);
+            border-color: #ff8a00;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 3rem;
+            }
+            
+            .menu-buttons {
+                width: 85%;
+            }
+            
+            #mobile-controls {
+                display: block;
+            }
+            
+            .weapon-hud {
+                width: 250px;
+                height: 100px;
+            }
+            
+            .buy-section {
+                min-width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #444;
+            }
+        }
+
+        /* Кроссхаир */
+        .crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        .crosshair::before, .crosshair::after {
+            content: '';
+            position: absolute;
+            background: #fff;
+        }
+
+        .crosshair::before {
+            width: 2px;
+            height: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .crosshair::after {
+            width: 20px;
+            height: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Уведомления */
+        .notification {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.3rem;
+            z-index: 50;
+            display: none;
+            border: 2px solid #ff8a00;
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Главное меню -->
+    <div id="main-menu">
+        <div class="logo">CS2-STYLE</div>
+        <div class="menu-buttons">
+            <button class="menu-btn" onclick="startGame()">ИГРАТЬ</button>
+            <button class="menu-btn" onclick="showScreen('skin-store')">МАГАЗИН СКИНОВ</button>
+            <button class="menu-btn" onclick="showScreen('cases-screen')">КЕЙСЫ</button>
+            <button class="menu-btn" onclick="showScreen('graphics-settings')">НАСТРОЙКИ</button>
+            <button class="menu-btn" onclick="showGameModes()">РЕЖИМЫ ИГРЫ</button>
+        </div>
+    </div>
+
+    <!-- Игровой экран -->
+    <div id="game-screen">
+        <div id="game-container"></div>
+        
+        <!-- HUD -->
+        <div id="hud">
+            <div class="crosshair"></div>
+            <div class="health-bar">
+                <div class="health-fill" id="health-fill">100 HP</div>
+            </div>
+            <div class="armor-bar">
+                <div class="armor-fill" id="armor-fill"></div>
+            </div>
+            <div class="money-display" id="money-display">$16000</div>
+            <div class="mini-map" id="mini-map"></div>
+            <div class="weapon-hud">
+                <div class="weapon-img" id="weapon-img"></div>
+                <div class="weapon-info">
+                    <div class="weapon-name" id="weapon-name">AK-47</div>
+                    <div class="ammo" id="ammo-display">30/90</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Меню закупа -->
+        <div id="buy-menu">
+            <div class="buy-section">
+                <h3>ПИСТОЛЕТЫ</h3>
+                <div class="buy-item" onclick="buyWeapon('Glock-18', 300)">
+                    <span>Glock-18</span>
+                    <span class="item-price">$300</span>
+                </div>
+                <div class="buy-item" onclick="buyWeapon('USP-S', 200)">
+                    <span>USP-S</span>
+                    <span class="item-price">$200</span>
+                </div>
+                <div class="buy-item" onclick="buyWeapon('Desert Eagle', 700)">
+                    <span>Desert Eagle</span>
+                    <span class="item-price">$700</span>
+                </div>
+            </div>
+            <div class="buy-section">
+                <h3>ВИНТОВКИ</h3>
+                <div class="buy-item" onclick="buyWeapon('AK-47', 2700)">
+                    <span>AK-47</span>
+                    <span class="item-price">$2700</span>
+                </div>
+                <div class="buy-item" onclick="buyWeapon('M4A4', 3100)">
+                    <span>M4A4</span>
+                    <span class="item-price">$3100</span>
+                </div>
+                <div class="buy-item" onclick="buyWeapon('AWP', 4750)">
+                    <span>AWP</span>
+                    <span class="item-price">$4750</span>
+                </div>
+            </div>
+            <div class="buy-section">
+                <h3>БРОНЯ</h3>
+                <div class="buy-item" onclick="buyArmor('Kevlar', 650)">
+                    <span>Kevlar</span>
+                    <span class="item-price">$650</span>
+                </div>
+                <div class="buy-item" onclick="buyArmor('Helmet', 350)">
+                    <span>Helmet</span>
+                    <span class="item-price">$350</span>
+                </div>
+            </div>
+            <div class="buy-section">
+                <h3>ГРАНАТЫ</h3>
+                <div class="buy-item" onclick="buyGrenade('HE Grenade', 300)">
+                    <span>HE Grenade</span>
+                    <span class="item-price">$300</span>
+                </div>
+                <div class="buy-item" onclick="buyGrenade('Flashbang', 200)">
+                    <span>Flashbang</span>
+                    <span class="item-price">$200</span>
+                </div>
+                <div class="buy-item" onclick="buyGrenade('Smoke', 300)">
+                    <span>Smoke</span>
+                    <span class="item-price">$300</span>
+                </div>
+            </div>
+            <button class="menu-btn" style="position: absolute; bottom: 25px; right: 25px; pointer-events: auto;" onclick="hideBuyMenu()">ЗАКРЫТЬ (B)</button>
+        </div>
+        
+        <!-- Управление для мобильных -->
+        <div id="mobile-controls">
+            <div class="controls-row">
+                <div class="control-btn" id="move-forward">↑</div>
+            </div>
+            <div class="controls-row">
+                <div class="control-btn" id="move-left">←</div>
+                <div class="control-btn" id="shoot-btn">FIRE</div>
+                <div class="control-btn" id="move-right">→</div>
+            </div>
+            <div class="controls-row">
+                <div class="control-btn" id="move-back">↓</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Магазин скинов -->
+    <div id="skin-store">
+        <h2 style="width: 100%; text-align: center; margin-bottom: 30px; font-size: 2.5rem; color: #ff8a00;">МАГАЗИН СКИНОВ</h2>
+        <div class="skin-category">
+            <h3>AK-47</h3>
+            <div class="skin-item" style="background: linear-gradient(45deg, #8B0000, #B22222, #DC143C);" onclick="buySkin('AK-47 | Redline', 1500)">
+                <div class="skin-name">Redline</div>
+                <div class="skin-price">$1500</div>
+            </div>
+            <div class="skin-item" style="background: linear-gradient(45deg, #228B22, #32CD32, #90EE90);" onclick="buySkin('AK-47 | Emerald', 1200)">
+                <div class="skin-name">Emerald</div>
+                <div class="skin-price">$1200</div>
+            </div>
+            <div class="skin-item" style="background: linear-gradient(45deg, #1E90FF, #4169E1, #0000CD);" onclick="buySkin('AK-47 | Blue Laminate', 1300)">
+                <div class="skin-name">Blue Laminate</div>
+                <div class="skin-price">$1300</div>
+            </div>
+        </div>
+        <div class="skin-category">
+            <h3>AWP</h3>
+            <div class="skin-item" style="background: linear-gradient(45deg, #FFD700, #DAA520, #B8860B);" onclick="buySkin('AWP | Dragon Lore', 5000)">
+                <div class="skin-name">Dragon Lore</div>
+                <div class="skin-price">$5000</div>
+            </div>
+            <div class="skin-item" style="background: linear-gradient(45deg, #F5F5F5, #D3D3D3, #A9A9A9);" onclick="buySkin('AWP | Lightning Strike', 2500)">
+                <div class="skin-name">Lightning Strike</div>
+                <div class="skin-price">$2500</div>
+            </div>
+            <div class="skin-item" style="background: linear-gradient(45deg, #FF69B4, #DB7093, #C71585);" onclick="buySkin('AWP | Pink DDPAT', 1800)">
+                <div class="skin-name">Pink DDPAT</div>
+                <div class="skin-price">$1800</div>
+            </div>
+        </div>
+        <button class="menu-btn" style="position: absolute; bottom: 25px; right: 25px; pointer-events: auto;" onclick="hideScreen('skin-store')">НАЗАД</button>
+    </div>
+
+    <!-- Настройки графики -->
+    <div id="graphics-settings">
+        <div class="settings-title">НАСТРОЙКИ ГРАФИКИ</div>
+        <div class="setting-option">
+            <label for="graphics-quality">КАЧЕСТВО ГРАФИКИ:</label>
+            <select id="graphics-quality">
+                <option value="low">НИЗКОЕ</option>
+                <option value="medium" selected>СРЕДНЕЕ</option>
+                <option value="high">ВЫСОКОЕ</option>
+                <option value="ultra">УЛЬТРА</option>
+            </select>
+        </div>
+        <div class="setting-option">
+            <label for="resolution">РАЗРЕШЕНИЕ:</label>
+            <select id="resolution">
+                <option value="720p">1280x720</option>
+                <option value="1080p" selected>1920x1080</option>
+                <option value="1440p">2560x1440</option>
+                <option value="4k">3840x2160</option>
+            </select>
+        </div>
+        <div class="setting-option">
+            <label for="texture-quality">КАЧЕСТВО ТЕКСТУР:</label>
+            <select id="texture-quality">
+                <option value="low">НИЗКОЕ</option>
+                <option value="medium">СРЕДНЕЕ</option>
+                <option value="high" selected>ВЫСОКОЕ</option>
+            </select>
+        </div>
+        <div class="setting-option">
+            <label for="shadow-quality">КАЧЕСТВО ТЕНЕЙ:</label>
+            <select id="shadow-quality">
+                <option value="off">ВЫКЛ</option>
+                <option value="low">НИЗКОЕ</option>
+                <option value="medium" selected>СРЕДНЕЕ</option>
+                <option value="high">ВЫСОКОЕ</option>
+            </select>
+        </div>
+        <div class="setting-option">
+            <label for="anti-aliasing">СГЛАЖИВАНИЕ:</label>
+            <select id="anti-aliasing">
+                <option value="off">ВЫКЛ</option>
+                <option value="fxaa">FXAA</option>
+                <option value="msaa2x">MSAA 2x</option>
+                <option value="msaa4x" selected>MSAA 4x</option>
+                <option value="msaa8x">MSAA 8x</option>
+            </select>
+        </div>
+        <button class="menu-btn" style="margin-top: 20px; pointer-events: auto;" onclick="applyGraphicsSettings()">ПРИМЕНИТЬ</button>
+        <button class="menu-btn" style="position: absolute; bottom: 25px; right: 25px; pointer-events: auto;" onclick="hideScreen('graphics-settings')">НАЗАД</button>
+    </div>
+
+    <!-- Кейсы -->
+    <div id="cases-screen">
+        <div class="cases-title">КЕЙСЫ</div>
+        <div class="cases-container">
+            <div class="case" onclick="openCase('Weapon Case 1')">
+                <div class="case-name">Weapon Case 1</div>
+            </div>
+            <div class="case" onclick="openCase('eSports Case')">
+                <div class="case-name">eSports Case</div>
+            </div>
+            <div class="case" onclick="openCase('Operation Case')">
+                <div class="case-name">Operation Case</div>
+            </div>
+        </div>
+        <button class="menu-btn" style="margin-top: 40px; pointer-events: auto;" onclick="hideScreen('cases-screen')">НАЗАД</button>
+    </div>
+
+    <!-- Уведомления -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Three.js библиотека -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/controls/PointerLockControls.js"></script>
+
+    <script>
+        // Игровые переменные
+        let gameState = {
+            player: {
+                health: 100,
+                money: 16000,
+                weapon: 'AK-47',
+                ammo: 30,
+                totalAmmo: 90,
+                armor: 100
+            },
+            gameActive: false,
+            currentScreen: 'main-menu',
+            scene: null,
+            camera: null,
+            renderer: null,
+            controls: null,
+            objects: [],
+            bots: [],
+            lastTime: 0,
+            moveForward: false,
+            moveBackward: false,
+            moveLeft: false,
+            moveRight: false
+        };
+
+        // Инициализация Three.js сцены
+        function initThreeJS() {
+            // Создаем сцену
+            gameState.scene = new THREE.Scene();
+            gameState.scene.background = new THREE.Color(0x1a1a2e);
+            gameState.scene.fog = new THREE.Fog(0x1a1a2e, 10, 50);
+
+            // Создаем камеру
+            gameState.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            gameState.camera.position.y = 1.6;
+
+            // Создаем рендерер
+            gameState.renderer = new THREE.WebGLRenderer({ antialias: true });
+            gameState.renderer.setSize(window.innerWidth, window.innerHeight);
+            gameState.renderer.shadowMap.enabled = true;
+            gameState.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.getElementById('game-container').appendChild(gameState.renderer.domElement);
+
+            // Добавляем освещение
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+            gameState.scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 10);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            gameState.scene.add(directionalLight);
+
+            // Создаем элементы управления
+            gameState.controls = new THREE.PointerLockControls(gameState.camera, document.body);
+            gameState.scene.add(gameState.controls.getObject());
+
+            // Создаем карту
+            createMap();
+
+            // Создаем ботов
+            createBots(5);
+
+            // Запускаем игровой цикл
+            animate();
+
+            // Обработка изменения размера окна
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        // Создание карты
+        function createMap() {
+            // Пол
+            const floorGeometry = new THREE.PlaneGeometry(50, 50);
+            const floorMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x444444,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            gameState.scene.add(floor);
+
+            // Стены
+            const wallMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x8B4513,
+                roughness: 0.7,
+                metalness: 0.1
+            });
+
+            // Создаем несколько стен
+            const wallPositions = [
+                { x: 0, z: -10, width: 20, height: 4, depth: 1 },
+                { x: 10, z: 0, width: 1, height: 4, depth: 20 },
+                { x: -10, z: 0, width: 1, height: 4, depth: 20 },
+                { x: 0, z: 10, width: 20, height: 4, depth: 1 },
+                { x: 5, z: 5, width: 5, height: 4, depth: 1 },
+                { x: -5, z: -5, width: 5, height: 4, depth: 1 }
+            ];
+
+            wallPositions.forEach(pos => {
+                const wallGeometry = new THREE.BoxGeometry(pos.width, pos.height, pos.depth);
+                const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+                wall.position.set(pos.x, pos.height/2, pos.z);
+                wall.castShadow = true;
+                wall.receiveShadow = true;
+                gameState.scene.add(wall);
+                gameState.objects.push(wall);
+            });
+
+            // Добавляем несколько ящиков
+            const boxGeometry = new THREE.BoxGeometry(2, 2, 2);
+            const boxMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x964B00,
+                roughness: 0.8,
+                metalness: 0.1
+            });
+
+            const boxPositions = [
+                { x: 3, z: 3 },
+                { x: -3, z: 3 },
+                { x: 3, z: -3 },
+                { x: -3, z: -3 }
+            ];
+
+            boxPositions.forEach(pos => {
+                const box = new THREE.Mesh(boxGeometry, boxMaterial);
+                box.position.set(pos.x, 1, pos.z);
+                box.castShadow = true;
+                box.receiveShadow = true;
+                gameState.scene.add(box);
+                gameState.objects.push(box);
+            });
+        }
+
+        // Создание ботов
+        function createBots(count) {
+            const botGeometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 8);
+            const botMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+
+            for (let i = 0; i < count; i++) {
+                const bot = new THREE.Mesh(botGeometry, botMaterial);
+                bot.position.set(
+                    Math.random() * 20 - 10,
+                    1,
+                    Math.random() * 20 - 10
+                );
+                bot.castShadow = true;
+                gameState.scene.add(bot);
+
+                gameState.bots.push({
+                    mesh: bot,
+                    health: 100,
+                    speed: 0.02 + Math.random() * 0.02,
+                    lastDirectionChange: 0,
+                    direction: new THREE.Vector3(
+                        Math.random() * 2 - 1,
+                        0,
+                        Math.random() * 2 - 1
+                    ).normalize()
+                });
+            }
+        }
+
+        // Анимация и игровой цикл
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (gameState.controls.isLocked === true) {
+                const time = performance.now();
+                const delta = (time - gameState.lastTime) / 1000;
+
+                // Движение игрока
+                const speed = 5 * delta;
+                if (gameState.moveForward) gameState.controls.moveForward(speed);
+                if (gameState.moveBackward) gameState.controls.moveForward(-speed);
+                if (gameState.moveLeft) gameState.controls.moveRight(-speed);
+                if (gameState.moveRight) gameState.controls.moveRight(speed);
+
+                // Движение ботов
+                updateBots(delta);
+
+                gameState.lastTime = time;
+            }
+
+            gameState.renderer.render(gameState.scene, gameState.camera);
+        }
+
+        // Обновление ботов
+        function updateBots(delta) {
+            gameState.bots.forEach(bot => {
+                // Простой ИИ: двигаться в случайном направлении, меняя его иногда
+                bot.lastDirectionChange += delta;
+                if (bot.lastDirectionChange > 2) {
+                    bot.direction = new THREE.Vector3(
+                        Math.random() * 2 - 1,
+                        0,
+                        Math.random() * 2 - 1
+                    ).normalize();
+                    bot.lastDirectionChange = 0;
+                }
+
+                // Движение
+                bot.mesh.position.x += bot.direction.x * bot.speed;
+                bot.mesh.position.z += bot.direction.z * bot.speed;
+
+                // Проверка столкновений со стенами
+                gameState.objects.forEach(obj => {
+                    if (isColliding(bot.mesh, obj)) {
+                        // Отскакиваем от стены
+                        bot.direction.x *= -1;
+                        bot.direction.z *= -1;
+                    }
+                });
+
+                // Поворот к игроку
+                const playerPos = gameState.controls.getObject().position;
+                bot.mesh.lookAt(playerPos.x, bot.mesh.position.y, playerPos.z);
+            });
+        }
+
+        // Проверка столкновений
+        function isColliding(obj1, obj2) {
+            const box1 = new THREE.Box3().setFromObject(obj1);
+            const box2 = new THREE.Box3().setFromObject(obj2);
+            return box1.intersectsBox(box2);
+        }
+
+        // Обработка изменения размера окна
+        function onWindowResize() {
+            gameState.camera.aspect = window.innerWidth / window.innerHeight;
+            gameState.camera.updateProjectionMatrix();
+            gameState.renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Обновление HUD
+        function updateHUD() {
+            document.getElementById('health-fill').style.width = gameState.player.health + '%';
+            document.getElementById('health-fill').textContent = gameState.player.health + ' HP';
+            document.getElementById('armor-fill').style.width = gameState.player.armor + '%';
+            document.getElementById('money-display').textContent = '$' + gameState.player.money;
+            document.getElementById('ammo-display').textContent = 
+                `${gameState.player.ammo}/${gameState.player.totalAmmo}`;
+            document.getElementById('weapon-name').textContent = gameState.player.weapon;
+            
+            // Обновление мини-карты
+            updateMiniMap();
+        }
+
+        // Обновление мини-карты
+        function updateMiniMap() {
+            const miniMap = document.getElementById('mini-map');
+            miniMap.innerHTML = '';
+            
+            // Игрок на мини-карте
+            const playerPos = gameState.controls.getObject().position;
+            const playerDot = document.createElement('div');
+            playerDot.style.position = 'absolute';
+            playerDot.style.width = '12px';
+            playerDot.style.height = '12px';
+            playerDot.style.background = '#0f0';
+            playerDot.style.borderRadius = '50%';
+            playerDot.style.left = (50 + playerPos.x / 50 * 90 - 6) + 'px';
+            playerDot.style.top = (50 + playerPos.z / 50 * 90 - 6) + 'px';
+            playerDot.style.boxShadow = '0 0 5px #0f0';
+            miniMap.appendChild(playerDot);
+            
+            // Боты на мини-карте
+            gameState.bots.forEach(bot => {
+                const botDot = document.createElement('div');
+                botDot.style.position = 'absolute';
+                botDot.style.width = '10px';
+                botDot.style.height = '10px';
+                botDot.style.background = '#f00';
+                botDot.style.borderRadius = '50%';
+                botDot.style.left = (50 + bot.mesh.position.x / 50 * 90 - 5) + 'px';
+                botDot.style.top = (50 + bot.mesh.position.z / 50 * 90 - 5) + 'px';
+                botDot.style.boxShadow = '0 0 5px #f00';
+                miniMap.appendChild(botDot);
+            });
+        }
+
+        // Покупка оружия
+        function buyWeapon(weapon, cost) {
+            if (gameState.player.money >= cost) {
+                gameState.player.weapon = weapon;
+                gameState.player.money -= cost;
+                gameState.player.ammo = 30;
+                gameState.player.totalAmmo = 90;
+                updateHUD();
+                showNotification(`Куплено: ${weapon}`);
+            } else {
+                showNotification('Недостаточно денег!');
+            }
+        }
+
+        // Покупка брони
+        function buyArmor(armor, cost) {
+            if (gameState.player.money >= cost) {
+                gameState.player.armor = armor === 'Kevlar' ? 100 : 50;
+                gameState.player.money -= cost;
+                updateHUD();
+                showNotification(`Куплено: ${armor}`);
+            } else {
+                showNotification('Недостаточно денег!');
+            }
+        }
+
+        // Покупка гранат
+        function buyGrenade(grenade, cost) {
+            if (gameState.player.money >= cost) {
+                gameState.player.money -= cost;
+                showNotification(`Куплено: ${grenade}`);
+            } else {
+                showNotification('Недостаточно денег!');
+            }
+        }
+
+        // Покупка скина
+        function buySkin(skin, cost) {
+            if (gameState.player.money >= cost) {
+                gameState.player.money -= cost;
+                updateHUD();
+                showNotification(`Куплен скин: ${skin}`);
+            } else {
+                showNotification('Недостаточно денег!');
+            }
+        }
+
+        // Открытие кейса
+        function openCase(caseName) {
+            if (gameState.player.money >= 500) {
+                gameState.player.money -= 500;
+                
+                // Случайный предмет из кейса
+                const items = [
+                    'AK-47 | Redline',
+                    'AWP | Lightning Strike',
+                    'M4A4 | Howl',
+                    'Glock-18 | Water Elemental',
+                    'Desert Eagle | Blaze'
+                ];
+                
+                const randomItem = items[Math.floor(Math.random() * items.length)];
+                showNotification(`Вы получили: ${randomItem} из ${caseName}`);
+                updateHUD();
+            } else {
+                showNotification('Недостаточно денег для открытия кейса!');
+            }
+        }
+
+        // Применение настроек графики
+        function applyGraphicsSettings() {
+            const quality = document.getElementById('graphics-quality').value;
+            const resolution = document.getElementById('resolution').value;
+            const textureQuality = document.getElementById('texture-quality').value;
+            const shadowQuality = document.getElementById('shadow-quality').value;
+            const antiAliasing = document.getElementById('anti-aliasing').value;
+            
+            showNotification(`Настройки применены:\nКачество: ${quality}\nРазрешение: ${resolution}\nТекстуры: ${textureQuality}\nТени: ${shadowQuality}\nСглаживание: ${antiAliasing}`);
+        }
+
+        // Показать уведомление
+        function showNotification(text) {
+            const notification = document.getElementById('notification');
+            notification.textContent = text;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Показать экран
+        function showScreen(screenId) {
+            document.getElementById('main-menu').classList.add('menu-hidden');
+            document.getElementById(screenId).style.display = 'flex';
+            gameState.currentScreen = screenId;
+        }
+
+        // Скрыть экран
+        function hideScreen(screenId) {
+            document.getElementById(screenId).style.display = 'none';
+            document.getElementById('main-menu').classList.remove('menu-hidden');
+            gameState.currentScreen = 'main-menu';
+        }
+
+        // Показать меню закупа
+        function showBuyMenu() {
+            document.getElementById('buy-menu').style.display = 'flex';
+        }
+
+        // Скрыть меню закупа
+        function hideBuyMenu() {
+            document.getElementById('buy-menu').style.display = 'none';
+        }
+
+        // Показать режимы игры
+        function showGameModes() {
+            const modes = [
+                'Соревновательный режим',
+                'Напарники',
+                'Бой насмерть',
+                'Захват флага',
+                'Спецоперация',
+                'Оружейная дуэль'
+            ];
+            
+            let modesText = 'Доступные режимы игры:\n\n';
+            modes.forEach(mode => {
+                modesText += `• ${mode}\n`;
+            });
+            
+            alert(modesText);
+        }
+
+        // Начать игру
+        function startGame() {
+            document.getElementById('main-menu').classList.add('menu-hidden');
+            document.getElementById('game-screen').style.display = 'block';
+            gameState.gameActive = true;
+            gameState.currentScreen = 'game-screen';
+            
+            initThreeJS();
+            updateHUD();
+            
+            // Блокировка указателя для управления
+            gameState.controls.lock();
+        }
+
+        // Обработка нажатий клавиш
+        document.addEventListener('keydown', function(e) {
+            if (gameState.currentScreen !== 'game-screen') return;
+            
+            switch(e.key) {
+                case 'w':
+                case 'ArrowUp':
+                    gameState.moveForward = true;
+                    break;
+                case 's':
+                case 'ArrowDown':
+                    gameState.moveBackward = true;
+                    break;
+                case 'a':
+                case 'ArrowLeft':
+                    gameState.moveLeft = true;
+                    break;
+                case 'd':
+                case 'ArrowRight':
+                    gameState.moveRight = true;
+                    break;
+                case 'b':
+                    if (gameState.controls.isLocked) {
+                        showBuyMenu();
+                    }
+                    break;
+                case ' ':
+                    // Стрельба
+                    if (gameState.player.ammo > 0) {
+                        gameState.player.ammo--;
+                        updateHUD();
+                        
+                        // Проверка попадания по ботам
+                        const raycaster = new THREE.Raycaster();
+                        raycaster.setFromCamera(new THREE.Vector2(0, 0), gameState.camera);
+                        const intersects = raycaster.intersectObjects(gameState.bots.map(bot => bot.mesh));
+                        
+                        if (intersects.length > 0) {
+                            const botIndex = gameState.bots.findIndex(bot => bot.mesh === intersects[0].object);
+                            if (botIndex !== -1) {
+                                gameState.bots[botIndex].health -= 25;
+                                if (gameState.bots[botIndex].health <= 0) {
+                                    gameState.scene.remove(gameState.bots[botIndex].mesh);
+                                    gameState.bots.splice(botIndex, 1);
+                                    gameState.player.money += 300;
+                                    updateHUD();
+                                    showNotification(`Бот уничтожен! +$300`);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 'r':
+                    // Перезарядка
+                    if (gameState.player.totalAmmo > 0 && gameState.player.ammo < 30) {
+                        const needed = 30 - gameState.player.ammo;
+                        const toReload = Math.min(needed, gameState.player.totalAmmo);
+                        gameState.player.ammo += toReload;
+                        gameState.player.totalAmmo -= toReload;
+                        updateHUD();
+                    }
+                    break;
+                case 'Escape':
+                    if (gameState.controls.isLocked) {
+                        gameState.controls.unlock();
+                    }
+                    break;
+            }
+        });
+
+        document.addEventListener('keyup', function(e) {
+            switch(e.key) {
+                case 'w':
+                case 'ArrowUp':
+                    gameState.moveForward = false;
+                    break;
+                case 's':
+                case 'ArrowDown':
+                    gameState.moveBackward = false;
+                    break;
+                case 'a':
+                case 'ArrowLeft':
+                    gameState.moveLeft = false;
+                    break;
+                case 'd':
+                case 'ArrowRight':
+                    gameState.moveRight = false;
+                    break;
+            }
+        });
+
+        // Обработка касаний для мобильных устройств
+        document.getElementById('move-forward').addEventListener('touchstart', function() {
+            gameState.moveForward = true;
+        });
+        document.getElementById('move-forward').addEventListener('touchend', function() {
+            gameState.moveForward = false;
+        });
+
+        document.getElementById('move-back').addEventListener('touchstart', function() {
+            gameState.moveBackward = true;
+        });
+        document.getElementById('move-back').addEventListener('touchend', function() {
+            gameState.moveBackward = false;
+        });
+
+        document.getElementById('move-left').addEventListener('touchstart', function() {
+            gameState.moveLeft = true;
+        });
+        document.getElementById('move-left').addEventListener('touchend', function() {
+            gameState.moveLeft = false;
+        });
+
+        document.getElementById('move-right').addEventListener('touchstart', function() {
+            gameState.moveRight = true;
+        });
+        document.getElementById('move-right').addEventListener('touchend', function() {
+            gameState.moveRight = false;
+        });
+
+        document.getElementById('shoot-btn').addEventListener('touchstart', function() {
+            if (gameState.player.ammo > 0) {
+                gameState.player.ammo--;
+                updateHUD();
+                
+                // Проверка попадания по ботам
+                const raycaster = new THREE.Raycaster();
+                raycaster.setFromCamera(new THREE.Vector2(0, 0), gameState.camera);
+                const intersects = raycaster.intersectObjects(gameState.bots.map(bot => bot.mesh));
+                
+                if (intersects.length > 0) {
+                    const botIndex = gameState.bots.findIndex(bot => bot.mesh === intersects[0].object);
+                    if (botIndex !== -1) {
+                        gameState.bots[botIndex].health -= 25;
+                        if (gameState.bots[botIndex].health <= 0) {
+                            gameState.scene.remove(gameState.bots[botIndex].mesh);
+                            gameState.bots.splice(botIndex, 1);
+                            gameState.player.money += 300;
+                            updateHUD();
+                            showNotification(`Бот уничтожен! +$300`);
+                        }
+                    }
+                }
+            }
+        });
+
+        // Инициализация при загрузке страницы
+        window.onload = function() {
+            // Проверка мобильного устройства
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                document.getElementById('mobile-controls').style.display = 'block';
+            }
+        };
+    </script>
+</body>
+</html>
